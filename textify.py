@@ -52,11 +52,8 @@ class Textifier:
 
         x = 0
         y = 0
-        letters = 0
+        brightness = 0
         while x + self.letter_w < width or y + self.letter_h < height:
-            letters += 1
-            brightness = 0
-
             # Iterate over the range of one letter and figure out its density.
             # We define density of color image as just the average
             # of the inverse of brightness.
@@ -72,7 +69,9 @@ class Textifier:
 
             # Average brightness
             brightness /= (self.letter_w * self.letter_h)
-            output.write('o')
+            output.write(chr(self.find_closest_char(brightness)))
+
+            brightness -= 1;
 
             # Move current position to the next letter
             x += self.letter_w
@@ -97,6 +96,28 @@ class Textifier:
 
         r, g, b = color
         return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    def find_closest_char(self, density):
+        """
+        Find the character that has density closest to the given density.
+
+        Args:
+            density (float): Density to match.
+
+        Returns:
+            int: Character code of the matched character.
+        """
+
+        chosen_char = None
+        closest_density = 99999;
+        for char in self.chars:
+            diff = abs(char[1] - density)
+
+            if diff < closest_density:
+                closest_density = diff
+                chosen_char = char[0]
+
+        return chosen_char
 
 def main():
     # Check if characters data file exist
