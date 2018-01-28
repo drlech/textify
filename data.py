@@ -46,7 +46,7 @@ def generate_data():
     """
 
     rgb = image.convert('RGB')
-    file = open('chars.txt', 'w')
+    file = open('chars', 'w')
 
     # We can use space as an "empty" character (0 density)
     file.write('13 0\n')
@@ -71,7 +71,7 @@ def generate_data():
                     black_pixels += 1
 
         # Write information about density to the file
-        density = black_pixels / (all_pixels * 1.0)
+        density = black_pixels / all_pixels
         file.write('%d %f\n' % (i, density))
 
         # Move the current position to the next letter
