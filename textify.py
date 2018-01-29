@@ -6,8 +6,8 @@ class Textifier:
     chars = []
     image = None
 
-    letter_w = 9
-    letter_h = 16
+    letter_w = 5
+    letter_h = 9
 
     def __init__(self, filename):
         """
@@ -109,6 +109,7 @@ class Textifier:
         """
 
         chosen_char = None
+        chosen_dens = None
         closest_density = 99999;
         for char in self.chars:
             diff = abs(char[1] - density)
@@ -116,6 +117,7 @@ class Textifier:
             if diff < closest_density:
                 closest_density = diff
                 chosen_char = char[0]
+                chosen_dens = char[1]
 
         return chosen_char
 
