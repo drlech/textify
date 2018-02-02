@@ -32,7 +32,7 @@ class DataGenerator:
         """
 
         file = open('allowed_chars.txt', 'r', encoding='utf8')
-        self.chars = file.read()
+        self.chars = file.read().strip()
         file.close()
 
     def calc_letter_sizes(self):

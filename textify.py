@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 
 class Textifier:
-    chars = []
+    chars = [(' ', 0)]
     image = None
 
     letter_w = 5
@@ -19,12 +19,11 @@ class Textifier:
         self.image = Image.open(filename)
 
         # Load character data
-        characters_file = open('chars', 'r')
+        characters_file = open('densities', 'r', encoding='utf8')
         for line in characters_file:
             split = line.split(' ')
 
-            # First element is a character number, second is density
-            split[0] = int(split[0])
+            # First element is a character, second is density
             split[1] = float(split[1].rstrip())
 
             self.chars.append((split[0], split[1]))
@@ -34,18 +33,12 @@ class Textifier:
         # Sort characters by density
         self.chars.sort(key = lambda char: char[1])
 
-        # Normalize densities to 0-1
-        highest_density = self.chars[-1][1];
-        ratio = 1 / highest_density
-
-        self.chars = list(map(lambda char: (char[0], char[1] * ratio), self.chars))
-
         # Run the image processing
         self.process()
 
     def process(self):
         # Ouput file
-        output = open('output.txt', 'w')
+        output = open('output.txt', 'wb')
 
         width, height = self.image.size
         rgb = self.image.convert('RGB')
@@ -69,7 +62,7 @@ class Textifier:
 
             # Average brightness
             brightness /= (self.letter_w * self.letter_h)
-            output.write(chr(self.find_closest_char(brightness)))
+            output.write(self.find_closest_char(brightness).encode())
 
             brightness -= 1;
 
@@ -79,7 +72,7 @@ class Textifier:
                 x = 0
                 y += self.letter_h
 
-                output.write('\n')
+                output.write('\n'.encode())
 
         output.close()
 
@@ -123,7 +116,7 @@ class Textifier:
 
 def main():
     # Check if characters data file exist
-    characters_file = Path('chars')
+    characters_file = Path('densities')
     if not characters_file.is_file():
         print('File with character data does not exist.')
         print('Did you run data generating script?')
