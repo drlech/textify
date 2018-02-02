@@ -1,4 +1,6 @@
 from PIL import Image, ImageFont, ImageDraw
+from pathlib import Path
+import sys
 
 class DataGenerator:
     # Characters
@@ -24,11 +26,22 @@ class DataGenerator:
         self.save_densities()
 
     def load_allowed_chars(self):
+        """
+        File allowed_chars.txt contains all the characters that can be used
+        when converting images to ASCII "art".
+        """
+
         file = open('allowed_chars.txt', 'r', encoding='utf8')
         self.chars = file.read()
         file.close()
 
     def calc_letter_sizes(self):
+        """
+        While we can explicitly set the font height, we don't know what the width
+        of the letter will be.
+        This method creates a "fake" image, draws a letter and measures it.
+        """
+
         self.font = ImageFont.truetype('consola.ttf', self.font_size);
 
         # We need that only to draw sample text and figure out font size.
@@ -41,10 +54,18 @@ class DataGenerator:
         self.letter_width, self.letter_height = draw.textsize('a', self.font)
 
     def prepare_canvas(self):
+        """
+        Instantiate the object we'll draw characters on.
+        """
+
         self.image = Image.new('RGB', (self.letter_width * len(self.chars), self.font_size), (255, 255, 255))
         self.draw = ImageDraw.Draw(self.image)
 
     def draw_letters(self):
+        """
+        Draw all allowed characters on an image to measure their densities.
+        """
+
         # First character is for some reason 65k+, I don't know what that is
         # or what it means.
         for i in range(1, len(self.chars)):
@@ -55,6 +76,12 @@ class DataGenerator:
         self.image.save('allowed_chars.png')
 
     def calc_densities(self):
+        """
+        Measure densities of all characters.
+        Density is just the proportion of all non-white pixels in the area
+        occupied by the character.
+        """
+
         canvas = self.image.convert('RGB')
 
         for i in range(1, len(self.chars)):
@@ -74,6 +101,10 @@ class DataGenerator:
             self.densities.append((self.chars[i], black_pixels / all_pixels))
 
     def save_densities(self):
+        """
+        Save calculated densities in a file the main script will use.
+        """
+
         file = open('densities', 'wb')
 
         for density in self.densities:
@@ -82,8 +113,51 @@ class DataGenerator:
 
         file.close()
 
+def densities_stats():
+    """
+    Print what generally the distribution of densities looks like.
+    """
+
+    file = Path('densities')
+    if not file.is_file():
+        print('Densities file does not exist.')
+        print('Try generating the character data first.')
+
+        return
+
+    file = open('densities', 'r', encoding='utf8')
+
+    densities = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for line in file:
+        # File contains densities in format:
+        # [character] [density]
+        split = line.split(' ')
+        density = split[len(split) - 1]
+
+        # Count how many characters are in each 10th
+        density = float(density)
+        index = int(density * 10)
+        if (index > 9):
+            index = 9
+
+        densities[index] += 1
+
+    file.close()
+
+    print(densities)
+
 def main():
-    DataGenerator()
+    if (len(sys.argv) > 1):
+        param = sys.argv[1]
+
+        if (param == 'stats'):
+            densities_stats()
+
+        else:
+            print('Unknown command')
+
+    else:
+        DataGenerator()
 
 if __name__ == '__main__':
     main()
