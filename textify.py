@@ -6,7 +6,7 @@ class Textifier:
     chars = [(' ', 0)]
     image = None
 
-    letter_w = 5
+    letter_w = 4
     letter_h = 9
 
     def __init__(self, filename):
@@ -100,6 +100,11 @@ class Textifier:
         Returns:
             int: Character code of the matched character.
         """
+
+        # Reverse density
+        # Great for displaying the output in a tool that displays light text
+        # on a dark background
+        density = 1 - density
 
         chosen_char = None
         chosen_dens = None
